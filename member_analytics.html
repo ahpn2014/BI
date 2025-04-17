@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>会员数据分析BI平台</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4285F4;
+      --primary-dark: #3367D6;
+      --primary-light: #8AB4F8;
+      --secondary: #34A853;
+      --danger: #EA4335;
+      --warning: #FBBC05;
+      --info: #17A2B8;
+      --dark: #343A40;
+      --light: #F8F9FA;
+      
+      /* 修改为日间模式颜色 */
+      --bg-dark: #F5F5F5;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F0F0F0;
+      
+      --text-primary: #212121;
+      --text-secondary: rgba(0, 0, 0, 0.7);
+      --text-tertiary: rgba(0, 0, 0, 0.5);
+      
+      --border-light: rgba(0, 0, 0, 0.1);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.1);
+      
+      /* 其余变量保持不变 */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: var(--space-md);
+    }
+    
+    .app-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xl);
+      justify-content: center;
+      padding-bottom: var(--space-xl);
+    }
+    
+    .screen {
+      width: 360px;
+      height: 720px;
+      background: var(--bg-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-light);
+    }
+    
+    .header {
+      padding: var(--space-md) var(--space-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .header-title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .header-action {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .icon-button:hover, .icon-button:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .content {
+      height: calc(100% - 56px);
+      overflow-y: auto;
+      padding: var(--space-md);
+    }
+    
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      border: 1px solid var(--border-light);
+      transition: all 0.2s ease;
+    }
+    
+    .card:active {
+      transform: scale(0.98);
+      background: var(--bg-card-hover);
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+    }
+    
+    .card-title .material-icons {
+      margin-right: var(--space-sm);
+      font-size: 20px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+    }
+    
+    .stat-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+      padding: var(--space-md);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .stat-change {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .stat-change.positive {
+      color: var(--secondary);
+    }
+    
+    .stat-change.negative {
+      color: var(--danger);
+    }
+    
+    .stat-change .material-icons {
+      font-size: 16px;
+      margin-right: 2px;
+    }
+    
+    .top-list {
+      margin-top: var(--space-md);
+    }
+    
+    .top-item {
+      display: flex;
+      align-items: center;
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .top-item:last-child {
+      border-bottom: none;
+    }
+    
+    .top-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-right: var(--space-sm);
+    }
+    
+    .top-name {
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .top-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: var(--space-md);
+    }
+    
+    .tab {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+    
+    .tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .date-picker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+    
+    .date-display {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .date-nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    .date-nav-button {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border: none;
+      cursor: pointer;
+    }
+    
+    .date-nav-button:first-child {
+      margin-right: var(--space-sm);
+    }
+    
+    .chart-container {
+      height: 200px;
+      margin: var(--space-md) 0;
+      position: relative;
+    }
+    
+    .chart-placeholder {
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+    }
+    
+    .nav-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--bg-card);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--border-light);
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: 12px;
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    
+    .badge {
+      position: absolute;
+      top: -2px;
+      right: -6px;
+      background: var(--danger);
+      color: white;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-item-wrapper {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- 数据概览页 -->
+  <div class="screen" id="overview">
+    <div class="header">
+      <div class="header-title">会员数据分析</div>
+      <div class="header-action">
+        <button class="icon-button">
+          <span class="material-icons">notifications</span>
+        </button>
+        <button class="icon-button">
+          <span class="material-icons">refresh</span>
+        </button>
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="date-picker">
+        <div class="date-display">2023年11月15日</div>
+        <div class="date-nav">
+          <button class="date-nav-button">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <button class="date-nav-button">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="tabs">
+        <div class="tab active">今日</div>
+        <div class="tab">本周</div>
+        <div class="tab">本月</div>
+        <div class="tab">年度</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title card-module">
+          <span class="material-icons">credit_card</span>
+          会员卡统计
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">会员卡总数</div>
+            <div class="stat-value">12,458</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +8.5%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日新增</div>
+            <div class="stat-value">86</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +12.3%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">悦享卡总数</div>
+            <div class="stat-value">5,732</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +15.2%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日新增</div>
+            <div class="stat-value">42</div>
+            <div class="stat-change negative">
+              <span class="material-icons">trending_down</span>
+              同比 -3.7%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">地产卡总数</div>
+            <div class="stat-value">3,215</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +5.8%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日新增</div>
+            <div class="stat-value">18</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +2.1%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">员工卡总数</div>
+            <div class="stat-value">1,024</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +1.2%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日新增</div>
+            <div class="stat-value">5</div>
+            <div class="stat-change negative">
+              <span class="material-icons">trending_down</span>
+              同比 -0.8%
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title storage-module">
+          <span class="material-icons">account_balance_wallet</span>
+          储值与消费
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">储值总额</div>
+            <div class="stat-value">¥3,245,786</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +18.5%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日储值</div>
+            <div class="stat-value">¥86,542</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +12.3%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">消费总额</div>
+            <div class="stat-value">¥2,876,543</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +15.2%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日消费</div>
+            <div class="stat-value">¥72,315</div>
+            <div class="stat-change negative">
+              <span class="material-icons">trending_down</span>
+              同比 -3.7%
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title points-module">
+          <span class="material-icons">loyalty</span>
+          积分与优惠券
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">赠积分总数</div>
+            <div class="stat-value">1,245,786</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +18.5%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日赠积分</div>
+            <div class="stat-value">8,642</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +12.3%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">消积分总数</div>
+            <div class="stat-value">876,543</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +15.2%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日消积分</div>
+            <div class="stat-value">7,315</div>
+            <div class="stat-change negative">
+              <span class="material-icons">trending_down</span>
+              同比 -3.7%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">核销券总数</div>
+            <div class="stat-value">3,245</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +8.5%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">今日核销券</div>
+            <div class="stat-value">86</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +12.3%
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">券过期总数</div>
+            <div class="stat-value">1,024</div>
+            <div class="stat-change positive">
+              <span class="material-icons">trending_up</span>
+              同比 +1.2%
+            </div>
+          </div>          <div class="
